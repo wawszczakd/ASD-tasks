@@ -6,34 +6,35 @@ private:
 	string s;
 	vector<vector<int>> rows;
 	
-	vector<int> bucket_sort(const vector<pair<int, int>> &vec) {
-		int m1 = 0, m2 = 0;
-		for (int i = 0; i < (int) vec.size(); i++) {
-			m1 = max(m1, vec[i].first + 1);
-			m2 = max(m2, vec[i].second + 1);
+	vector<int> count_sort(const vector<pair<int, int>> &pairs, const vector<int> &order, bool by_first) { 
+		int max_value = 0;
+		for (auto [first, second] : pairs) {
+			max_value = max(max_value, (by_first ? first : second) + 1);
 		}
 		
-		vector<vector<int>> buckets1(m1), buckets2(m2);
-		for (int i = 0; i < (int) vec.size(); i++) {
-			buckets2[vec[i].second].emplace_back(i);
+		vector<int> count(max_value);
+		for (auto [first, second] : pairs) {
+			count[by_first ? first : second]++;
 		}
-		for (int i = 0; i < m2; i++) {
-			for (int x: buckets2[i]) {
-				buckets1[vec[x].first].emplace_back(x);
-			}
+		for (int i = 1; i < max_value; i++) {
+			count[i] += count[i - 1];
 		}
 		
-		vector<int> result(vec.size());
-		for (int i = 0, last = -1; i < m1; i++) {
-			for (int j = 0; j < (int) buckets1[i].size(); j++) {
-				if (j == 0 || vec[buckets1[i][j - 1]].second != vec[buckets1[i][j]].second) {
-					last++;
-				}
-				result[buckets1[i][j]] = last;
-			}
+		vector<int> new_order(order.size());
+		for (int i = order.size() - 1; i >= 0; i--) {
+			new_order[--count[by_first ? pairs[order[i]].first : pairs[order[i]].second]] = order[i];
 		}
+		return new_order;
+	}
+	
+	vector<int> radix_sort(const vector<pair<int, int>> &pairs) {
+		vector<int> order(pairs.size());
+		iota(order.begin(), order.end(), 0);
 		
-		return result;
+		order = count_sort(pairs, order, false);
+		order = count_sort(pairs, order, true);
+		
+		return order;
 	}
 	
 	void build() {
@@ -58,7 +59,16 @@ private:
 			for (int i = 0; i < (int) s.size() + 1 - (1 << row); i++) {
 				pairs[i] = make_pair(rows[row - 1][i], rows[row - 1][i + (1 << (row - 1))]);
 			}
-			rows[row] = bucket_sort(pairs);
+			
+			vector<int> order = radix_sort(pairs);
+			
+			rows[row].resize(s.size() + 1 - (1 << row));
+			for (int i = 0, last = 0; i < (int) order.size(); i++) {
+				if (i > 0 && pairs[order[i]] != pairs[order[i - 1]]) {
+					last++;
+				}
+				rows[row][order[i]] = last;
+			}
 		}
 	}
 	
