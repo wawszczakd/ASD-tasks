@@ -9,4 +9,4 @@ ASD stands for "Algorytmy i Struktury Danych" in Polish, which translates to
 "Algorithms and Data Structures". This repository contains my solutions to the
 tasks from this course. All the solutions are written in C++. Unfortunately,
 the task statements are not provided, but I believe they can be found somewhere
-on [sio2.mimuw.edu.pl](https://sio2.mimuw.edu.pl/).
+on [Szkopuł](https://szkopul.edu.pl/).
